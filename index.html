@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>My Picture Gallery</title>
+    <style type="text/css">
+	.pictureLayer 
+	{
+		position: absolute; 
+		top: 0px; 
+		left: 15%;
+	}
+	.showPictureLayer
+	{
+		position: absolute;
+		top: 0px;
+		left: 0px;
+		
+	}
+	</style>
+  </head>
+
+  <body>
+    <script type="text/javascript" src="Vector.js"></script>
+	<script type="text/javascript">
+	// The list of all images to be displayed in this gallery.
+	var ListOfImages = ["pic1.JPG",
+						"pic2.JPG",
+						"pic3.JPG",
+						"pic4.JPG",
+						"pic5.JPG",
+						"pic6.JPG",
+						"pic7.JPG",
+						"pic2.JPG",
+						"pic3.JPG",
+						"pic4.JPG",
+						"pic5.JPG",
+						"pic6.JPG",
+						"pic7.JPG",
+						"pic2.JPG",
+						"pic3.JPG",
+						"pic4.JPG",
+						"pic5.JPG",
+						"pic6.JPG",
+						"pic7.JPG",
+						"pic2.JPG",
+						"pic3.JPG",
+						"pic4.JPG",
+						"pic5.JPG",
+						"pic6.JPG",
+						"pic7.JPG",
+						"pic8.JPG"];
+	// Number of rows to display images in.
+	var NumberOfRows = 4;
+	// Determine how big the small images should be.
+	var thumbNailWidth = 75;
+	var thumbNailHeight = 75;
+	
+	// Create our gallery.	
+	var gallery = new Object();
+	gallery.width = 800;
+	gallery.height = 300;
+	// Create our single image size. 95% of the screen.
+	var singleImage = new Object();
+	singleImage.width = window.innerWidth;
+	singleImage.height = window.innerHeight;
+	
+	// Generate the HTML for the canvas elements.
+	document.write('<div>');	
+	document.write('<canvas id="gallery" width="' + gallery.width + '" height="' + gallery.height + '" class="pictureLayer">');
+	document.write('Fallback Content, in case you have a bad browser.');
+	document.write('</canvas>');
+	document.write('<canvas id="showPicture" width="' + singleImage.width + '" height="' + singleImage.height + '"class="showPictureLayer"></canvas>');
+	document.write('</div>');
+
+	// These will be used to draw on.
+	var galleryContext = document.getElementById('gallery').getContext('2d');
+	var showPictureContext = document.getElementById('showPicture').getContext('2d');
+	
+	gallery.offsetTop = document.getElementById('gallery').offsetTop;
+	gallery.offsetLeft = document.getElementById('gallery').offsetLeft;
+
+	/**
+	* Class to be used for pictures.
+	* @x - Horizontal start position.
+	* @y - Vertical start position.
+	* @imageName - Relative path to image source.
+	*/
+	function MyPicture(x, y, imageName)
+	{
+		// Position on the screen.
+		this.x = x;
+		this.y = y;
+		// Speed.
+		this.velocity = new Vector(0, 0);
+		// How fast the image slows down.
+		this.friction = 1;
+		// The image to draw.
+		this.image = new Image();
+		this.image.src = imageName;
+		// Size of the thumbnail to draw.
+		this.tbWidth = thumbNailWidth;
+		this.tbHeight = thumbNailHeight;
+		
+		// Move or remove the partcle.
+		this.update = function()
+		{
+			this.x = this.x + this.velocity.x;
+			this.y = this.y + this.velocity.y;
+			
+			if (this.velocity.x > 0)
+			{
+				this.velocity.x = this.velocity.x - this.friction;
+			}
+			else if (this.velocity.x < 0)
+			{
+				this.velocity.x = this.velocity.x + this.friction;
+			}
+			if (this.velocity.y > 0)
+			{
+				this.velocity.y = this.velocity.y - this.friction;
+			}
+			else if (this.velocity.y < 0)
+			{
+				this.velocity.y = this.velocity.y + this.friction;
+			}
+		}
+		// Move the image along the x axis.
+		this.pushRight = function()
+		{
+			this.velocity.x = 10;
+		}
+		// Move the image negatively along the x axis.
+		this.pushLeft = function()
+		{
+			this.velocity.x = -10;
+		}
+		// Move the image down the screen.
+		this.pushDown = function()
+		{
+			this.velocity.y = 10;
+		}
+		// Move the image toward the top of the screen.
+		this.pushUp = function()
+		{
+			this.velocity.y = -10;
+		}
+		// Draw and animate the particle.
+		this.draw = function(context)
+		{
+			// Draw a 4 pixel border aroud the image.
+			drawBorder(context, this.x-2, this.y-2, this.tbWidth+4, this.tbHeight+4, "orange");
+			// Draw the image.
+			context.drawImage(this.image, this.x, this.y, this.tbWidth, this.tbHeight);
+		}
+		// Check if the given coordinates are within the image.
+		this.isClickedOn = function(x,y)
+		{
+			if (x > this.x && x < this.x + this.tbWidth &&
+				y > this.y && y < this.y + this.tbHeight)
+			{
+				return true;
+			}
+			return false;
+		}
+	}
+
+	/**
+	* Draw a border from the given coordinates.
+	* @context - 2d context.
+	* @x - Top left corner.
+	* @y - Top right corner.
+	* @width - Width of the square.
+	* @height - Height of the square.
+	* @color - Color of the lines.
+	*/
+	function drawBorder(context, x, y, width, height, color)
+	{
+		// Nice rounded corners.
+		context.strokeStyle = color;
+		context.lineJoin = "round";
+		context.lineCap = "round";
+		context.lineWidth = 4;
+		
+		// Draw a square.
+		context.beginPath();
+		context.moveTo(x,y);
+		context.lineTo(x+width, y);
+		context.lineTo(x+width, y+height);
+		context.lineTo(x, y+height);
+		context.lineTo(x, y);
+		context.stroke();
+		context.closePath();
+	}
+	
+	/**
+	 * Draw text on the screen
+	 */
+	function drawText(context, text, color, shadow)
+	{
+		context.fillStyle = color;
+		context.font = '20px Arial';
+		context.textBaseline = 'top';
+		context.fillText(text, gallery.width*.2, gallery.height*.5);
+	}
+	
+	//
+	// Init some variables needed to determine where to draw the images.
+	//
+	var pictures = new Array();
+	var startX = 0;
+	var startY = 20;
+	var distanceApart = 20;
+	var imagesPerRow = Math.floor(ListOfImages.length / NumberOfRows);
+
+	// Generate MyPicture objects and their positions based on the list of image names given at the top.
+	for (var i = 0; i < ListOfImages.length; i++)
+	{	
+		// Determine if this image should go in a new row.
+		if (i > 0 && i % imagesPerRow == 0)
+		{
+			startX = 0;
+			// Set the vertical position for the new row.
+			startY = startY + thumbNailHeight + distanceApart;
+		}
+		// Add the picture the to gallery.
+		pictures.push(new MyPicture(startX, startY, ListOfImages[i]));
+		// Set the horizontal position for the next image.
+		startX = startX + thumbNailWidth + distanceApart;
+	}
+	
+	//
+	// The following variables determine what image to draw large and if it should be.
+	//
+	var showPictureSrc = "";
+	var showPictureSize = new Vector();
+	var drawImage = false;
+	//
+	// The following variables determine how the gallery moves and if it can move.
+	//
+	var moveRight = false;
+	var moveLeft = false;
+	var moveUp = false;
+	var moveDown = false;
+	var isMaxRight = false;
+	var isMaxLeft = false;
+	var isMaxUp = false;
+	var isMaxDown = false;
+	// Determine whether we need to re-draw the screen or not.
+	var isDirty = true;
+	
+	/**
+	 * Calls itself in an endless loop to draw and update all on screen items.
+	 */
+	function update()
+	{
+		if (moveRight || moveLeft || drawImage || moveUp || moveDown)
+		{
+			isDirty = true;
+		}
+		
+		if (isDirty)
+		{
+			//
+			// Clear each canvas so we can re-draw it. Also, color the background.
+			//
+			galleryContext.clearRect(0, 0, gallery.width, gallery.height);
+			galleryContext.fillStyle = 'grey';
+			galleryContext.fillRect(0, 0, gallery.width, gallery.height);
+			showPictureContext.clearRect(0, 0, singleImage.width, singleImage.height);
+						
+			if (drawImage)
+			{
+				// Draw the selected source image in front of everything else.
+				var image = new Image();
+				image.src = showPictureSrc;
+				// Determine where the selected image should go on the screen so it is centered.
+				var xPos = (1 - (showPictureSize.x / singleImage.width)) / 2 * singleImage.width;
+				if (xPos < 0) xPos = 0;
+				var yPos = (1 - (showPictureSize.y / singleImage.height)) / 2 * singleImage.height;
+				if (yPos < 0) yPos = 0;
+				showPictureContext.drawImage(image, xPos, yPos);
+				drawBorder(showPictureContext, xPos, yPos, showPictureSize.x, showPictureSize.y, 'blue');
+				image = null;
+				//drawText(showPictureContext, "Click to Close", "black", true);
+				
+				moveRight = false;
+				moveLeft = false;
+				moveUp = false;
+				moveDown = false;
+			}
+			
+			// Default to false, will set to true if pictures are moving.
+			isDirty = false;
+			// Defualt to true, will negate this if pictures can still move in a given direction.
+			isMaxRight = true;
+			isMaxLeft = true;
+			isMaxUp = true;
+			isMaxDown = true;
+			
+			// For loop for all pictures we know of.
+			for (var i = 0; i < pictures.length; i++)
+			{
+				var pic = pictures[i];
+				// Move the picture if needed.
+				if (moveRight) pic.pushRight();
+				if (moveLeft) pic.pushLeft();
+				if (moveDown) pic.pushDown();
+				if (moveUp) pic.pushUp();
+				// Update its position.
+				pic.update();
+				// Draw it even if it is off screen.
+				pic.draw(galleryContext);
+				
+				// If a picture is moving then we need to redraw.
+				if (pic.velocity.x != 0 || pic.velocity.y != 0)
+				{
+					isDirty = true;
+				}
+				
+				// 
+				// If at least one picture still has room to move left or right or up or down
+				// then we will allow the user to move them left or right or up or down, Otherwise
+				// we must stop all movement in that particular direction.
+				//
+				if (pic.x < gallery.width/2)
+				{
+					isMaxRight = false;
+				}
+				if (pic.x > gallery.width/2)
+				{
+					isMaxLeft = false;
+				}
+				if (pic.y > gallery.height/2)
+				{
+					isMaxUp = false;
+				}
+				if (pic.y < gallery.height/2)
+				{
+					isMaxDown = false;
+				}
+			}
+			
+			// Stop moving right if all pictures are on the right.
+			if (isMaxRight) moveRight = false;
+			// Stop moving left if all pictures are on the left.
+			if (isMaxLeft) moveLeft = false;
+			// Stop moving down if all pictures are below the center.
+			if (isMaxDown) moveDown = false;
+			// Stop moving up if all pictures are above the center.
+			if (isMaxUp) moveUp = false;
+			
+			// Draw the border last so it is on top.
+			drawBorder(galleryContext, 2, 2, gallery.width-4, gallery.height-4, "brown");
+		}
+		
+		// 30 FPS. This is how the endless loop is created.
+		setTimeout(update, 1000/30);
+	}
+	
+	/**
+	 * Called when a user presses a key.
+	 * @ev - The event that stores keygallery information.
+	 */
+	function keyDown(ev)
+	{
+		var keyID = ev.keyCode;
+		//alert(keyID);
+		switch(keyID)
+		{
+			case 39:
+				moveLeft = !isMaxLeft;
+			break;
+			case 37:
+				moveRight = !isMaxRight;
+			break;
+			default:
+			    //Do nothing for other keys.
+			break;
+		}
+		
+		return;
+	}
+	
+	/**
+	 * Called when a user release a key.
+	 * @ev - The event that stores keygallery information.
+	 */
+	function keyUp(ev)
+	{
+		var keyID = ev.keyCode;
+		//alert(keyID);
+		switch(keyID)
+		{
+			case 39:
+				moveLeft = false;
+			break;
+			case 37:
+				moveRight = false;
+			break;
+			default:
+			    //Do nothing for other keys.
+			break;
+		}
+		
+		return;
+	}
+	
+	/**
+	 * Mouse button released.
+	 * @ev - The event that stores mouse information.
+	 */
+	function ev_mouseup (ev) 
+	{
+		return;
+	}
+		
+	/**
+	 * Mouse button pressed.
+	 * @ev - The event that stores mouse information.
+	 */
+	function ev_mousedown(ev)
+	{
+		// Anything other than left mouse button is ignored.
+		if (ev.button != 0)
+		{
+			return;
+		}
+	
+		var x, y;
+		// Get the mouse position relative to the canvas element.
+		if (ev.layerX || ev.layerX == 0) { // Firefox
+		  x = ev.layerX;
+		  y = ev.layerY;
+		} else if (ev.offsetX || ev.offsetX == 0) { // Opera
+		  x = ev.offsetX;
+		  y = ev.offsetY;
+		}
+		
+		//
+		// x and y currently hold values for the click on the showPictureCanvas.
+		// These need to be converted to the galleryCanvas since that is where
+		// the thumbnails live.
+		//
+		x = x - gallery.offsetLeft;
+		y = y - gallery.offsetTop;
+		
+		showPictureSrc = "";
+		// Deteremine which picture was clicked on.
+		for (var i = 0; i < pictures.length; i++)
+		{
+			var pic = pictures[i];
+			if (pic.isClickedOn(x,y))
+			{
+				showPictureSrc = pic.image.src;
+				showPictureSize = new Vector(pic.image.width, pic.image.height);
+			}
+		}
+		
+		// Each click either hides or shows the image if an image was selected.
+		drawImage = !drawImage && (showPictureSrc != "");
+		// A click means something changed on screen. Therefore it is dirty.
+		isDirty = true;
+		
+		return;
+	}
+	
+	/**
+	 * Mouse moved.
+	 * @ev - The event that stores mouse information.
+	 */
+	function ev_mousemove (ev) 
+	{
+		var x, y;
+
+		// Get the mouse position relative to the canvas element.
+		if (ev.layerX || ev.layerX == 0) { // Firefox
+		  x = ev.layerX;
+		  y = ev.layerY;
+		} else if (ev.offsetX || ev.offsetX == 0) { // Opera
+		  x = ev.offsetX;
+		  y = ev.offsetY;
+		}
+		
+		//
+		// Do nothing if the user's mouse is not over the gallery.
+		//
+		if (x < gallery.offsetLeft || x > (gallery.offsetLeft+gallery.width) ||
+		    y < gallery.offsetTop || y > (gallery.offsetTop+gallery.height)) 
+		{
+			moveRight = moveLeft = moveUp = moveDown = false; 
+			return;
+		}
+		// 
+		// Otherwise adjust x and y to the gallery canvas.
+		//
+		x = x - gallery.offsetLeft;
+		y = y - gallery.offsetTop;
+		
+		//
+		// The following determines if the user wants to move all images right or left
+		// based on mouse position.
+		//
+		var galleryHorizontalPercentage = (gallery.width - x) / gallery.width;
+		if (galleryHorizontalPercentage < .2)
+		{
+			moveLeft = !isMaxLeft;
+		}
+		else if (galleryHorizontalPercentage > .8)
+		{
+			moveRight = !isMaxRight;
+		}
+		else
+		{
+			moveRight = false;
+			moveLeft = false;
+		}
+		//
+		// The following determines if the user wants to move all images up or down
+		// based on mouse position.
+		//
+		var galleryVerticalPercentage = (gallery.height - y) / gallery.height;
+		if (galleryVerticalPercentage < .2)
+		{
+			moveUp = !isMaxUp;
+		}
+		else if (galleryVerticalPercentage > .8)
+		{
+			moveDown = !isMaxDown;
+		}
+		else
+		{
+			moveUp = false;
+			moveDown = false;
+		}
+		
+		return;
+	}
+	
+	// Add window listeners
+	if(window.addEventListener) {
+		window.addEventListener('keydown',keyDown,false);
+		window.addEventListener('keyup',keyUp,false);
+		window.addEventListener('load', update, false); 
+		window.addEventListener('mousemove', ev_mousemove, false);
+		window.addEventListener('mouseup', ev_mouseup, false);
+		window.addEventListener('mousedown', ev_mousedown, false);
+	}
+	</script>
+  </body>
+</html>
