@@ -2,10 +2,11 @@
 <html>
 
   <head>
+    <meta HTTP-EQUIV="REFRESH" content="0; url=picture.html">
     <meta charset='utf-8' />
     <meta http-equiv="X-UA-Compatible" content="chrome=1" />
     <meta name="description" content="Picture-viewer : Javascript canvas to scroll and select images." />
-
+      
     <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
     <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
@@ -36,7 +37,7 @@
           
         <p>Javascript canvas to scroll and select images.</p>
           
-        <div id="example"></div>
+        <div width="500px" height="500px" id="example"></div>
         <script>
           jQuery.ajax("picture.html").done(function(data){
             $("#example").html(data);
