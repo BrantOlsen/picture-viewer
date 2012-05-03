@@ -7,7 +7,8 @@
     <meta name="description" content="Picture-viewer : Javascript canvas to scroll and select images." />
 
     <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
-
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
     <title>Picture-viewer</title>
   </head>
 
@@ -15,27 +16,33 @@
 
     <!-- HEADER -->
     <div id="header_wrap" class="outer">
-        <header class="inner">
-          <a id="forkme_banner" href="https://github.com/BrantOlsen/picture-viewer">View on GitHub</a>
+      <header class="inner">
+        <a id="forkme_banner" href="https://github.com/BrantOlsen/picture-viewer">View on GitHub</a>
 
-          <h1 id="project_title">Picture-viewer</h1>
-          <h2 id="project_tagline">Javascript canvas to scroll and select images.</h2>
+        <h1 id="project_title">Picture-viewer</h1>
+        <h2 id="project_tagline">Javascript canvas to scroll and select images.</h2>
 
-            <section id="downloads">
-              <a class="zip_download_link" href="https://github.com/BrantOlsen/picture-viewer/zipball/master">Download this project as a .zip file</a>
-              <a class="tar_download_link" href="https://github.com/BrantOlsen/picture-viewer/tarball/master">Download this project as a tar.gz file</a>
-            </section>
-        </header>
+        <section id="downloads">
+          <a class="zip_download_link" href="https://github.com/BrantOlsen/picture-viewer/zipball/master">Download this project as a .zip file</a>
+          <a class="tar_download_link" href="https://github.com/BrantOlsen/picture-viewer/tarball/master">Download this project as a tar.gz file</a>
+        </section>
+      </header>
     </div>
 
     <!-- MAIN CONTENT -->
     <div id="main_content_wrap" class="outer">
       <section id="main_content" class="inner">
         <h1>picture-viewer</h1>
-
-<p>Javascript canvas to scroll and select images.</p>
+          
+        <p>Javascript canvas to scroll and select images.</p>
+          
+        <div id="example"></div>
+        <script>
+          jQuery.ajax("picture.html").done(function(data){
+            $("#example").html(data);
+          });
+        </script>        
       </section>
-      <iframe width=100% height="500px" src="picture.html"></iframe>
     </div>
 
     <!-- FOOTER  -->
@@ -46,7 +53,7 @@
       </footer>
     </div>
 
-    
+
 
   </body>
 </html>
